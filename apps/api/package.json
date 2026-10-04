@@ -1,0 +1,25 @@
+{
+  "name": "@needit/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/main.js",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11",
+    "@nestjs/core": "^11",
+    "@nestjs/platform-express": "^11",
+    "reflect-metadata": "^0.2",
+    "rxjs": "^7"
+  },
+  "devDependencies": {
+    "@types/express": "^5",
+    "@types/node": "^24",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

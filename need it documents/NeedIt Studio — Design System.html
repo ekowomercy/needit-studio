@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeedIt Studio — Design System Preview</title>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root, [data-theme="light"] {
+  /* primitives */
+  --n-0:#FFFFFF; --n-50:#F6F8F9; --n-100:#E8ECEE; --n-200:#D3DADD; --n-300:#B6C1C5;
+  --n-400:#8FA0A6; --n-500:#6E7F86; --n-600:#54636A; --n-700:#3F4B52; --n-800:#2B353B;
+  --n-900:#1C2428; --n-1000:#101517;
+  --p-50:#E7F6EE; --p-100:#BFE8D2; --p-200:#90D6B0; --p-300:#5DBF8A; --p-400:#34A86C;
+  --p-500:#1A8F55; --p-600:#1A7F4B; --p-700:#13643C; --p-800:#0E4A2D; --p-900:#0A331F;
+  --acc-300:#FFD666; --acc-400:#FFC233; --acc-500:#F5A623;
+  --success:#1A8F55; --warning:#E8871E; --danger:#D64545; --info:#2F6FED;
+  --rating:#F5A623; --verified:#F5A623;
+
+  /* semantic */
+  --bg:#FFFFFF; --surface:#F6F8F9; --surface-2:#FFFFFF; --border:#E8ECEE; --border-strong:#D3DADD;
+  --text:#1C2428; --text-muted:#6E7F86; --text-invert:#FFFFFF;
+  --primary:#1A7F4B; --primary-hover:#13643C; --primary-soft:#E7F6EE;
+  --shadow-1:0 1px 2px rgba(16,21,23,.06); --shadow-2:0 4px 12px rgba(16,21,23,.08);
+  --shadow-3:0 12px 32px rgba(16,21,23,.14);
+}
+[data-theme="dark"] {
+  --n-0:#0F1417; --n-50:#171E22; --n-100:#1F282D; --n-200:#2A3338; --n-300:#3B474E;
+  --n-400:#5C6B73; --n-500:#8A99A1; --n-600:#AAB6BD; --n-700:#C6CFD4; --n-800:#E1E6E9;
+  --n-900:#EEF1F3; --n-1000:#F7F9FA;
+  --p-50:#0E2A1C; --p-100:#124025; --p-200:#195C36; --p-300:#1F7A46; --p-400:#229553;
+  --p-500:#25AB5F; --p-600:#3CBF76; --p-700:#5ECF90; --p-800:#8AE0B3; --p-900:#BCF0D5;
+  --bg:#0F1417; --surface:#171E22; --surface-2:#1F282D; --border:#2A3338; --border-strong:#3B474E;
+  --text:#EEF1F3; --text-muted:#8A99A1; --text-invert:#0F1417;
+  --primary:#3CBF76; --primary-hover:#5ECF90; --primary-soft:#124025;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 4px 12px rgba(0,0,0,.4); --shadow-3:0 12px 32px rgba(0,0,0,.55);
+}
+
+/* ============ BASE ============ */
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;line-height:1.55;transition:background .2s,color .2s}
+.page{max-width:1080px;margin:0 auto;padding:32px 24px 96px}
+a{color:var(--primary)}
+code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:5px;font-size:13px}
+h1.ds-title{font-size:30px;margin:0 0 6px}
+.ds-sub{color:var(--text-muted);font-size:15px;margin:0 0 28px}
+section{margin:56px 0 0}
+.sec-head{display:flex;align-items:center;gap:12px;margin:0 0 18px}
+.sec-head h2{font-size:20px;margin:0}
+.sec-tag{background:var(--primary-soft);color:var(--primary);border:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+
+/* color swatches */
+.swatch{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.swatch .chip{height:64px;display:block}
+.swatch .meta{padding:8px 10px;font-size:12px}
+.swatch .meta b{display:block;font-size:13px}
+.swatch .meta span{color:var(--text-muted)}
+
+/* type scale */
+.typespec{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.typespec .row{display:flex;flex-direction:column;gap:2px}
+.typespec .label{font-size:11px;color:var(--text-muted);letter-spacing:.05em;text-transform:uppercase;font-weight:600}
+.ts-display{font-size:34px;font-weight:800;letter-spacing:-.01em}
+.ts-titlelg{font-size:24px;font-weight:700}
+.ts-titlemd{font-size:20px;font-weight:600}
+.ts-titlesm{font-size:17px;font-weight:600}
+.ts-bodylg{font-size:16px}
+.ts-body{font-size:15px}
+.ts-bodysm{font-size:14px;color:var(--text-muted)}
+.ts-caption{font-size:12px;font-weight:500;color:var(--text-muted)}
+.ts-overline{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+
+/* ============ COMPONENTS ============ */
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;transition:background .15s,transform .05s;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--primary);color:var(--text-invert)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--primary-soft);color:var(--primary);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--primary);color:var(--text-invert)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border-strong)}
+.btn-ghost:hover{background:var(--surface)}
+.btn-danger{background:var(--danger);color:#FFF}
+.btn-sm{padding:8px 12px;font-size:13px;border-radius:8px}
+.btn-lg{padding:14px 22px;font-size:16px;border-radius:12px}
+.btn-block{display:flex;width:100%;justify-content:center}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:13px;font-weight:600}
+.input,.select{width:100%;background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit}
+.input::placeholder{color:var(--text-muted)}
+.input:focus,.select:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:transparent}
+.select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-muted) 50%),linear-gradient(135deg,var(--text-muted) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.input-error{border-color:var(--danger)}
+.error-msg{color:var(--danger);font-size:13px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border-strong);color:var(--text);border-radius:999px;padding:9px 15px;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip-active{background:var(--primary);border-color:var(--primary);color:var(--text-invert)}
+.chip-cat{background:var(--primary-soft);border-color:transparent;color:var(--primary);font-weight:600}
+
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.badge-verified{background:#FFF4D6;color:#B87900;border:1px solid #F5E0A0}
+[data-theme="dark"] .badge-verified{background:#402E00;color:#FFD666;border:1px solid #6B4F00}
+.badge-availability{background:var(--p-50);color:var(--p-600);border:1px solid var(--p-100)}
+.badge-neutral{background:var(--surface);color:var(--text-muted);border:1px solid var(--border)}
+
+.rating{display:inline-flex;align-items:center;gap:6px;color:var(--n-600);font-size:13px}
+.stars{color:var(--rating);letter-spacing:1px;font-size:14px}
+.price{font-weight:700;font-size:16px}
+.price-lg{font-size:22px;font-weight:800}
+.price small{font-weight:500;color:var(--text-muted);font-size:12px}
+
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:var(--p-100);color:var(--p-700);font-weight:700;font-size:16px;flex:none}
+.avatar-lg{width:72px;height:72px;font-size:26px}
+.avatar-plus{position:relative}
+.avatar-plus .v{position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;background:var(--n-800);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--n-50);font-weight:700}
+
+/* cards */
+.card{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow-1)}
+.result-card{background:var(--surface-2);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-1);transition:box-shadow .15s;display:flex;flex-direction:column}
+.result-card:hover{box-shadow:var(--shadow-2)}
+.result-card img{width:100%;height:140px;object-fit:cover;background:var(--p-100)}
+.result-card .body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.result-card .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.result-card h3{margin:0;font-size:16px;font-weight:600}
+.result-card .loc{font-size:13px;color:var(--text-muted)}
+.result-card .meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.thumb{width:100%;height:130px;background:linear-gradient(135deg,var(--p-100),var(--p-300));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:40px}
+
+/* stepper */
+.stepper{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+.step .dot{width:24px;height:24px;border-radius:50%;background:var(--surface);border:2px solid var(--border-strong);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-muted)}
+.step.done .dot{background:var(--primary);border-color:var(--primary);color:#fff}
+.step.done{color:var(--text)}
+.step.active .dot{border-color:var(--primary);color:var(--primary);background:var(--primary-soft)}
+.step.active{color:var(--primary);font-weight:600}
+.stepper .line{width:26px;height:2px;background:var(--border-strong);margin:0 4px}
+.stepper .line.done{background:var(--primary)}
+
+/* tabs */
+.tabs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px}
+.tab{border:none;background:transparent;color:var(--text-muted);font-weight:600;font-size:14px;padding:9px 16px;border-radius:9px;cursor:pointer}
+.tab-active{background:var(--surface-2);color:var(--text);box-shadow:var(--shadow-1)}
+
+/* skeleton/empty */
+.skel{background:var(--n-100);border-radius:8px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:.9}}
+.empty{border:1px dashed var(--border-strong);border-radius:14px;padding:34px;text-align:center;background:var(--surface)}
+.empty .ic{font-size:34px}
+.empty h4{margin:8px 0 4px}
+.empty p{color:var(--text-muted);font-size:14px;margin:0 0 14px}
+
+/* ============ SCREEN MOCKS ============ */
+.mock{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow-2)}
+.mock-head{background:var(--surface-2);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.mock-title{font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--text)}
+.mock-body{padding:18px}
+.hero{background:linear-gradient(135deg,var(--p-600),var(--p-400));border-radius:18px;padding:30px 26px;color:#fff}
+.hero h1{margin:0 0 6px;font-size:26px;font-weight:800}
+.hero p{margin:0 0 18px;opacity:.9;font-size:15px}
+.need-input{width:100%;display:flex;gap:10px}
+.need-input .input{flex:1;border:none;box-shadow:var(--shadow-2)}
+.need-input .btn{box-shadow:var(--shadow-2)}
+.pop-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.example-line{color:rgba(255,255,255,.85);font-size:13px}
+.switch{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.switch label{font-size:13px;color:var(--text-muted)}
+.tgl{position:relative;width:44px;height:24px;background:var(--border-strong);border-radius:999px;cursor:pointer;transition:background .2s;border:none}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+body[data-theme="dark"] .tgl{background:var(--primary)}
+body[data-theme="dark"] .tgl::after{transform:translateX(20px)}
+.footer-note{margin-top:60px;color:var(--text-muted);font-size:13px;border-top:1px solid var(--border);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap">
+    <div>
+      <h1 class="ds-title">NeedIt Studio — Design System</h1>
+      <p class="ds-sub">Preview build of the token + component library defined in the Implementation Plan §1</p>
+    </div>
+    <div class="switch">
+      <span>🌙</span>
+      <button class="tgl" id="themeToggle" title="Toggle light/dark" aria-label="Toggle theme"></button>
+      <span>☀️</span>
+    </div>
+  </div>
+  <span class="sec-tag">Phase 0 · Foundation</span>
+</header>
+
+<!-- ============ COLORS ============ -->
+<section>
+  <div class="sec-head"><h2>Colors</h2><span class="sec-tag">tokens</span></div>
+
+  <h3 style="font-size:15px;margin:0 0 10px">Primary — Brand green</h3>
+  <div class="grid g4">
+    <div class="swatch"><span class="chip" style="background:var(--p-50)"></span><div class="meta"><b>primary-50</b><span style="color:var(--p-50)">#E7F6EE</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-100)"></span><div class="meta"><b>primary-100</b><span style="color:var(--p-100)">#BFE8D2</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-200)"></span><div class="meta"><b>primary-200</b><span style="color:var(--p-200)">#90D6B0</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-300)"></span><div class="meta"><b>primary-300</b><span style="color:var(--p-300)">#5DBF8A</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-400)"></span><div class="meta"><b>primary-400</b><span style="color:var(--p-400)">#34A86C</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-500)"></span><div class="meta"><b>primary-500</b><span style="color:var(--p-500)">#1A8F55</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-600)"></span><div class="meta"><b>primary-600</b><span style="color:var(--p-600)">#1A7F4B</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-700)"></span><div class="meta"><b>primary-700</b><span style="color:var(--p-700)">#13643C</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-800)"></span><div class="meta"><b>primary-800</b><span style="color:var(--p-800)">#0E4A2D</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--p-900)"></span><div class="meta"><b>primary-900</b><span style="color:var(--p-900)">#0A331F</span></div></div>
+  </div>
+
+  <h3 style="font-size:15px;margin:22px 0 10px">Neutral scale</h3>
+  <div class="grid g4">
+    <div class="swatch"><span class="chip" style="background:var(--n-50)"></span><div class="meta"><b>neutral-50</b><span style="color:var(--n-50)">#F6F8F9</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--n-100)"></span><div class="meta"><b>neutral-100</b><span style="color:var(--n-100)">#E8ECEE</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--n-300)"></span><div class="meta"><b>neutral-300</b><span style="color:var(--n-300)">#B6C1C5</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--n-500)"></span><div class="meta"><b>neutral-500</b><span style="color:var(--n-500)">#6E7F86</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--n-700)"></span><div class="meta"><b>neutral-700</b><span style="color:var(--n-700)">#3F4B52</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--n-900)"></span><div class="meta"><b>neutral-900</b><span style="color:var(--n-900)">#1C2428</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--acc-400)"></span><div class="meta"><b>accent-400</b><span style="color:var(--acc-400)">#FFC233 · rating</span></div></div>
+    <div class="swatch"><span class="chip" style="background:var(--danger)"></span><div class="meta"><b>danger</b><span style="color:var(--danger)">#D64545</span></div></div>
+  </div>
+</section>
+
+<!-- ============ TYPOGRAPHY ============ -->
+<section>
+  <div class="sec-head"><h2>Typography</h2><span class="sec-tag">scale</span></div>
+  <div class="typespec">
+    <div class="row"><span class="label">Display · 34 / 800</span><span class="ts-display">What do you need?</span></div>
+    <div class="row"><span class="label">Title Large · 24 / 700</span><span class="ts-titlelg">Find the people, products &amp; services</span></div>
+    <div class="row"><span class="label">Title Medium · 20 / 600</span><span class="ts-titlemd">Popular near you</span></div>
+    <div class="row"><span class="label">Title Small · 17 / 600</span><span class="ts-titlesm">Plumber · Ikeja, Lagos</span></div>
+    <div class="row"><span class="label">Body Large · 16</span><span class="ts-bodylg">I need a plumber to fix my leaking tap tomorrow.</span></div>
+    <div class="row"><span class="label">Body · 15</span><span class="ts-body">Fixing taps, pipes, toilets and water heaters.</span></div>
+    <div class="row"><span class="label">Body Small · 14 · muted</span><span class="ts-bodysm">Available Monday–Saturday · replies within 1h</span></div>
+    <div class="row"><span class="label">Caption · 12 · 500</span><span class="ts-caption">128 reviews · 4.8</span></div>
+    <div class="row"><span class="label">Overline · 11 · 700 · UPPER</span><span class="ts-overline">Verified Provider · Anniversary</span></div>
+  </div>
+</section>
+
+<!-- ============ BUTTONS ============ -->
+<section>
+  <div class="sec-head"><h2>Buttons &amp; Inputs</h2><span class="sec-tag">actions</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+    <button class="btn btn-primary">Primary</button>
+    <button class="btn btn-secondary">Secondary</button>
+    <button class="btn btn-ghost">Ghost</button>
+    <button class="btn btn-danger">Danger</button>
+    <button class="btn btn-primary" disabled>Disabled</button>
+    <button class="btn btn-primary btn-sm">Small</button>
+    <button class="btn btn-primary btn-lg">Large</button>
+    <button class="btn btn-primary btn-block" style="max-width:280px">Book Service</button>
+  </div>
+
+  <div class="grid g2" style="margin-top:18px">
+    <div>
+      <div class="field"><label>Full name</label><input class="input" placeholder="Mercy Ekowo"></div>
+      <div class="field"><label>Phone number (+234)</label><input class="input" placeholder="0801 234 5678"></div>
+      <div class="field"><label>Budget (₦)</label><input class="input" placeholder="150,000"></div>
+      <div class="field"><label>Invalid input</label><input class="input input-error" value="bad@"><span class="error-msg">Please enter a valid email</span></div>
+      <div class="field"><label>Location</label><select class="select"><option>Ikeja, Lagos</option><option>Victoria Island, Lagos</option><option>Lekki, Lagos</option><option>Wuse, Abuja</option></select></div>
+    </div>
+    <div class="card">
+      <span class="overline" style="margin-bottom:10px;display:inline-block">OTP input mock</span>
+      <div style="display:flex;gap:8px">
+        <input class="input" maxlength="1" placeholder="0" style="text-align:center;width:46px;padding:12px 0">
+        <input class="input" maxlength="1" placeholder="0" style="text-align:center;width:46px;padding:12px 0">
+        <input class="input" maxlength="1" placeholder="0" style="text-align:center;width:46px;padding:12px 0">
+        <input class="input" maxlength="1" placeholder="0" style="text-align:center;width:46px;padding:12px 0">
+      </div>
+      <p style="font-size:13px;color:var(--text-muted)">A code was sent to <b>0801 234 5678</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHIPS & BADGES ============ -->
+<section>
+  <div class="sec-head"><h2>Chips, Badges &amp; Rating</h2><span class="sec-tag">status</span></div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px">
+    <span class="chip chip-cat">🔧 Home Services</span>
+    <span class="chip chip-cat">📱 Used Items</span>
+    <span class="chip chip-active">👩🏫 Tutors</span>
+    <span class="chip">🎨 Designers</span>
+    <span class="chip">🧹 Cleaning</span>
+    <span class="chip">🚚 Transport</span>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+    <span class="badge badge-verified">✓ Verified</span>
+    <span class="badge badge-availability">Available today</span>
+    <span class="badge badge-neutral">Under ₦150,000</span>
+    <span class="badge badge-neutral">Used · Like new</span>
+    <span class="badge badge-neutral">Replies in ~1h</span>
+    <span class="rating"><span class="stars">★★★★★</span> 4.8 (128)</span>
+    <span class="price">₦25,000 <small>starting price</small></span>
+    <span class="price-lg">₦145,000</span>
+  </div>
+</section>
+
+<!-- ============ CARDS ============ -->
+<section>
+  <div class="sec-head"><h2>Result cards</h2><span class="sec-tag">type-aware</span></div>
+  <div class="grid g4">
+    <!-- person -->
+    <div class="result-card">
+      <div class="thumb">🔧</div>
+      <div class="body">
+        <div class="row"><h3>Musa Bello</h3><span class="badge badge-verified">✓</span></div>
+        <span class="loc">Ikeja, Lagos · 2km away</span>
+        <div class="meta"><span class="badge badge-availability">Available tomorrow</span></div>
+        <div class="row"><span class="rating"><span class="stars">★★★★★</span> 4.9 (214)</span><span class="price">₦8k</span></div>
+        <button class="btn btn-primary btn-sm btn-block">Book / Contact</button>
+      </div>
+    </div>
+    <!-- product -->
+    <div class="result-card">
+      <div class="thumb" style="background:linear-gradient(135deg,#C9D6FF,#8AA7FF)">🧺</div>
+      <div class="body">
+        <div class="row"><h3>Used washing machine</h3></div>
+        <span class="loc">Lekki, Lagos · seller: Gift's Store</span>
+        <div class="meta"><span class="badge badge-neutral">Used · Fair</span><span class="price">₦135,000</span></div>
+        <button class="btn btn-primary btn-sm btn-block">Contact seller</button>
+      </div>
+    </div>
+    <!-- service -->
+    <div class="result-card">
+      <div class="thumb" style="background:linear-gradient(135deg,#FFE1C2,#FFB36B)">🎨</div>
+      <div class="body">
+        <div class="row"><h3>Flyer design</h3><span class="badge badge-verified">✓</span></div>
+        <span class="loc">Online · Lagos</span>
+        <div class="meta"><span class="rating"><span class="stars">★★★★☆</span> 4.6 (89)</span><span class="price">₦15k</span></div>
+        <button class="btn btn-primary btn-sm btn-block">Hire designer</button>
+      </div>
+    </div>
+    <!-- multiple -->
+    <div class="result-card">
+      <div class="thumb" style="background:linear-gradient(135deg,#FFD6E0,#FF9DB5)">🎂</div>
+      <div class="body">
+        <div class="row"><h3>Birthday cake</h3></div>
+        <span class="loc">Next-day delivery available</span>
+        <div class="meta">
+          <span class="badge badge-neutral">Bakers</span>
+          <span class="badge badge-neutral">Cakes</span>
+          <span class="badge badge-neutral">Shops</span>
+          <span class="badge badge-neutral">Delivery</span>
+        </div>
+        <button class="btn btn-primary btn-sm btn-block">Show all options</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AVATARS / TRUST / STEPS ============ -->
+<section>
+  <div class="sec-head"><h2>Identity, Trust &amp; Status</h2><span class="sec-tag">profile</span></div>
+  <div class="grid g3">
+    <div class="card" style="display:flex;gap:14px;align-items:center">
+      <span class="avatar avatar-lg avatar-plus">MB<span class="v">✓</span></span>
+      <div>
+        <b>Musa Bello</b><br>
+        <span class="badge badge-verified">✓ Verified</span><br>
+        <span style="font-size:13px;color:var(--text-muted)">Plumber · 47 jobs completed</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="overline" style="margin-bottom:12px;display:inline-block">Booking status</span>
+      <div class="stepper">
+        <span class="step done"><span class="dot">✓</span>Requested</span>
+        <span class="line done"></span>
+        <span class="step done"><span class="dot">✓</span>Confirmed</span>
+        <span class="line done"></span>
+        <span class="step active"><span class="dot">3</span>In progress</span>
+        <span class="line"></span>
+        <span class="step"><span class="dot">4</span>Completed</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);margin:12px 0 0">Scheduled: Tomorrow, 10:00 · Ikeja</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab tab-active">My Needs</button>
+        <button class="tab">Saved</button>
+        <button class="tab">Bookings</button>
+        <button class="tab">Chats</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATES ============ -->
+<section>
+  <div class="sec-head"><h2>Loading &amp; Empty states</h2><span class="sec-tag">feedback</span></div>
+  <div class="grid g3">
+    <div class="result-card">
+      <div class="skel" style="height:130px;border-radius:0"></div>
+      <div class="body">
+        <div class="skel" style="height:16px;width:60%"></div>
+        <div class="skel" style="height:12px;width:40%"></div>
+        <div class="skel" style="height:34px;width:100%"></div>
+      </div>
+    </div>
+    <div class="empty">
+      <div class="ic">🔍</div>
+      <h4>No results yet</h4>
+      <p>Searching now — we'll notify you when someone in your area can help. This stays active as a NeedIt Request.</p>
+      <button class="btn btn-secondary btn-sm">Edit request</button>
+    </div>
+    <div class="empty">
+      <div class="ic">📦</div>
+      <h4>No saved items yet</h4>
+      <p>Tap the bookmark on any result to save it here.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN MOCKUP ============ -->
+<section>
+  <div class="sec-head"><h2>Screen mockup — Home</h2><span class="sec-tag">composition</span></div>
+  <div class="mock">
+    <div class="mock-head"><span class="mock-title">NeedIt Studio</span><span class="badge badge-neutral">🌍 Lagos, Nigeria</span></div>
+    <div class="mock-body">
+      <div class="hero">
+        <h1>What do you need?</h1>
+        <p>Tell us naturally — we'll find the people, products &amp; services.</p>
+        <div class="need-input">
+          <input class="input" placeholder="Tell us what you need…" value="I need a used washing machine under ₦150k">
+          <button class="btn btn-primary">Find it</button>
+        </div>
+        <div class="pop-list">
+          <span class="example-line">💬 "I need a plumber tomorrow."</span>
+          <span class="example-line">💬 "I need someone to design a flyer."</span>
+          <span class="example-line">💬 "I need a maths tutor for my child."</span>
+        </div>
+      </div>
+      <h3 style="font-size:15px;margin:22px 0 10px">Popular needs</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip chip-cat">🔧 Home Services</span>
+        <span class="chip chip-cat">📱 Used Items</span>
+        <span class="chip chip-cat">👩🏫 Tutors</span>
+        <span class="chip chip-cat">🎨 Designers</span>
+        <span class="chip chip-cat">🧹 Cleaning</span>
+        <span class="chip chip-cat">🔩 Repairs</span>
+        <span class="chip chip-cat">💄 Beauty</span>
+        <span class="chip chip-cat">🚚 Transport</span>
+        <span class="chip chip-cat">🎉 Events</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="footer-note">Design tokens &amp; components map to Implementation Plan §1 (Design System). Primary: #1A7F4B · Accent/rating: #F5A623 · Naira pricing via Intl for en-NG. Toggle above to preview dark mode.</p>
+
+</div>
+
+<script>
+const tgl = document.getElementById('themeToggle');
+const root = document.documentElement;
+if (localStorage.getItem('ds-theme')) {
+  root.dataset.theme = localStorage.getItem('ds-theme');
+}
+tgl.addEventListener('click', () => {
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('ds-theme', root.dataset.theme);
+});
+</script>
+</body>
+</html>

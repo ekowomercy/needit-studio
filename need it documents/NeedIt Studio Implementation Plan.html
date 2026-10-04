@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>NeedIt Studio Implementation Plan</title>
+<style>body{font-family:Segoe UI, Arial, sans-serif;max-width:880px;margin:32px auto;padding:0 20px;line-height:1.55;color:#1f2328}h1{font-size:26px;border-bottom:2px solid #d0d7de;padding-bottom:6px}h2{font-size:21px;border-bottom:1px solid #d0d7de;padding-bottom:4px;margin-top:36px}h3{font-size:17px;margin-top:26px}h4{font-size:15px;margin-top:20px}code{background:#f6f8fa;padding:1px 5px;border-radius:4px;font-family:Consolas,monospace;font-size:90%}pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #d0d7de;padding:7px 10px;text-align:left;font-size:14px}th{background:#f6f8fa}blockquote{border-left:4px solid #d0d7de;margin:10px 0;padding:2px 14px;color:#57606a}hr{border:0;border-top:1px solid #d0d7de;margin:22px 0}li{margin:3px 0}</style></head><body>
+<p># NeedIt Studio — Implementation Plan</p>
+<p><strong>Version:</strong> 1.0</p>
+<p><strong>Status:</strong> Ready for engineering execution</p>
+<p><strong>Inputs:</strong> "NeedIt Studio PRD (Buildable Spec).md" (§ references below)</p>
+<p><strong>Market:</strong> Nigeria (MVP) · <strong>Primary experience:</strong> "Tell us what you need."</p>
+<p>This plan defines the build sequence: <strong>design system → platform → architecture → services → feature phases → launch</strong>, with exit criteria per phase. It resolves the "Open Decisions" from the buildable PRD (§15) with recommended defaults (marked <strong>R</strong>), so engineers can start without blocking questions.</p>
+<hr>
+<p># 0. Decision Summary (recommended defaults)</p>
+<table>
+<tr><th>Decision</th><th>Recommendation</th><th>Alternative</th></tr>
+<tr><td>Platform</td><td><strong>PWA (React + TypeScript + Next.js)</strong>, installable on Android/iOS</td><td>Native (Expo)</td></tr>
+<tr><td>Backend</td><td><strong>NestJS (TypeScript)</strong> API</td><td>Fastify/Express</td></tr>
+<tr><td>Monorepo</td><td><strong>Turborepo (pnpm)</strong></td><td>Separate repos</td></tr>
+<tr><td>Database</td><td><strong>PostgreSQL 16 + PostGIS</strong></td><td>Supabase (managed PG)</td></tr>
+<tr><td>ORM</td><td><strong>Prisma</strong> (+ raw SQL for geo queries)</td><td>Drizzle</td></tr>
+<tr><td>Auth</td><td><strong>JWT access + refresh</strong>, phone-OTP primary, email fallback</td><td>Supabase Auth</td></tr>
+<tr><td>OTP provider</td><td><strong>Termii</strong> (Nigeria focus); Twilio fallback</td><td>Auth signal</td></tr>
+<tr><td>Intent parsing</td><td><strong>LLM structured-output</strong> (OpenAI gpt-4o-mini <strong>R</strong>) + rule-based fallback</td><td>Claude, local model</td></tr>
+<tr><td>Search</td><td><strong>Postgres (pg_trgm + FTS)</strong> for MVP</td><td>Meilisearch/Typesense (Phase 2 if needed)</td></tr>
+<tr><td>Geo</td><td><strong>City + LGA + radius</strong>, optional GPS; circular distance scoring</td><td>Full PostGIS routing</td></tr>
+<tr><td>Realtime/messaging</td><td><strong>REST + short polling</strong> in MVP; <strong>Socket.io</strong> (optional late)</td><td>SSE</td></tr>
+<tr><td>Payments</td><td><strong>Not in MVP</strong>; Paystack <strong>R</strong> primary in Phase 1</td><td>Flutterwave</td></tr>
+<tr><td>Notifications</td><td>In-app table; <strong>FCM</strong> push in Phase 1</td><td>OneSignal</td></tr>
+<tr><td>Files/images</td><td><strong>Cloudinary</strong> (easy resize/delivery) or S3+CDN</td><td>Local disk dev-only</td></tr>
+<tr><td>Jobs/cache</td><td><strong>Redis + BullMQ</strong></td><td>In-process</td></tr>
+<tr><td>CI/CD</td><td><strong>GitHub Actions</strong> + container deploy</td><td>—</td></tr>
+<tr><td>Hosting</td><td>API: <strong>Railway/Render</strong> <strong>R</strong>; DB: <strong>Neon (Serverless PG)</strong> <strong>R</strong></td><td>Fly.io, Hetzner</td></tr>
+<tr><td>Observability</td><td><strong>Sentry</strong> (errors) + structured logs + health endpoints</td><td>Grafana stack</td></tr>
+</table>
+<p>Choices favor a <strong>single TypeScript language across the stack</strong> (small team → one mental model), <strong>Postgres for both relational + search + geo</strong>, and <strong>managed services</strong> to minimize ops in MVP.</p>
+<hr>
+<p># 1. Design System (Phase 0)</p>
+<p>## 1.1 Tokens (foundation)</p>
+<p>Define tokens in three tiers: <strong>primitives → semantic → component</strong>. Deliver via CSS variables + a TypeScript theme object.</p>
+<p><strong>Color (primitives)</strong></p>
+<ul>
+<li>Neutral scale 0–1000 (grays) for text/backgrounds/borders.</li>
+<li>Brand: single primary (e.g., deep green <code>#1A7F4B</code>-family <strong>R</strong>) + supporting accent.</li>
+<li>Semantics: success / warning / danger / info.</li>
+<li>Purpose-tinted tokens: <code>--color-primary</code>, <code>--color-surface</code>, <code>--color-on-surface</code>, <code>--color-border</code>, <code>--color-rating</code> (trust), <code>--color-budget</code> etc.</li>
+</ul>
+<p><strong>Typography</strong></p>
+<ul>
+<li>Scale: <code>display / title-lg / title-md / title-sm / body-lg / body / body-sm / caption / overline</code>.</li>
+<li>Font stack with fallbacks; Naira symbol rendering test (<code>₦</code> in headings and products).</li>
+<li>Numbers tabular where prices shown (avoid jitter in comparisons).</li>
+</ul>
+<p><strong>Spacing & radii</strong></p>
+<ul>
+<li>4px spacing grid (<code>space-1 … space-12</code>).</li>
+<li>Radius scale: <code>sm 6 / md 10 / lg 16 / pill</code>.</li>
+<li>Elevation: 3 shadow levels; focus rings (WCAG 2.2 AA contrast + visible focus).</li>
+</ul>
+<p><strong>Iconography + imagery</strong></p>
+<ul>
+<li>One icon set (e.g., Lucide); category icon mapping (plumbing, appliances, design, tutoring, beauty, transport…).</li>
+<li>Avatar/placeholder system; verified badge asset (gold check).</li>
+</ul>
+<p>## 1.2 Component library</p>
+<p>Ship as an internal package (<code>packages/ui</code>) using <strong>Radix primitives + Tailwind</strong> (or styled-system). <strong>R:</strong> shadcn/ui-style composition.</p>
+<p>Required components (grouped):</p>
+<ul>
+<li><strong>Layout:</strong> AppShell (bottom nav for mobile-first), TopBar, PageHeader, Section, Card, ListRow, Skeleton, EmptyState.</li>
+<li><strong>Search:</strong> NeedInput (hero), ExamplePills, SuggestChips (auto-options), RefinementBar.</li>
+<li><strong>Results:</strong> ResultCard (variant: person | product | service | multiple), RatingStars, PriceTag (<code>₦</code> formatting util), AvailabilityChip, TrustBadge (verified/response-rate), SortMenu, FilterSheet.</li>
+<li><strong>Detail:</strong> ListingGallery, ProviderHeader (avatar, stats, verified), PortfolioGrid, ReviewList(+input), SchedulePicker, BookingModal, ActionBar (Contact/Book/Save).</li>
+<li><strong>Provider:</strong> ProfileWizard, ListingForm (multi-part), AvailabilityEditor, RequestQueueItem, BookingStatusStepper.</li>
+<li><strong>Global:</strong> Button, Input/Textarea, Select, Toggle, Chip, Modal/Sheet, Toast, Tabs, Stepper, Avatar, Badge, Tooltip, EmptyState, Skeleton, FormField+validation, PhoneInput (+234), OTPInput.</li>
+</ul>
+<p>## 1.3 Design-system acceptance criteria</p>
+<p>1. No hardcoded color/spacing/radius in app code — only semantic tokens.</p>
+<p>2. All interactive elements keyboard-navigable + visible focus.</p>
+<p>3. <code>₦</code> renders consistently; prices use <code>Intl.NumberFormat('en-NG', {style:'currency', currency:'NGN'})</code>.</p>
+<p>4. Storybook + one reference page (Home) implemented from tokens only.</p>
+<p>5. Light + dark modes via token swap (dark optional in MVP).</p>
+<p>## 1.4 Test/reference pages (built with DS only)</p>
+<p>Home (hero + popular needs), Results, Provider Profile, Listing detail, My Needs, Provider workspace shell.</p>
+<hr>
+<p># 2. Repository & Tooling (Phase 0)</p>
+<p>## 2.1 Monorepo layout</p>
+<pre>
+needit/
+├─ apps/
+│  ├─ web/                  # Next.js PWA (seeker + provider UI)
+│  └─ api/                  # NestJS backend
+├─ packages/
+│  ├─ ui/                   # design-system components
+│  ├─ engine/               # intent parser client + matching scorer (pure TS)
+│  ├─ shared/               # shared TS types (entities, DTOs, enums)
+│  ├─ config/               # eslint / tsconfig / tailwind presets
+│  └─ db/                   # Prisma schema + migrations + seed
+├─ docs/                    # PRDs + this plan
+├─ .github/workflows/       # CI/CD
+├─ turbo.json &#183; pnpm-workspace.yaml &#183; docker-compose.yml (dev db)
+└─ README.md
+</pre>
+<p>## 2.2 Tooling & quality gates</p>
+<ul>
+<li><strong>pnpm</strong> workspaces + <strong>Turborepo</strong>.</li>
+<li><strong>TypeScript strict</strong> across all packages.</li>
+<li><strong>ESLint + Prettier</strong> presets in <code>packages/config</code>; <code>turbo lint</code>, <code>turbo typecheck</code>.</li>
+<li><strong>Vitest</strong> (unit) + <strong>Playwright</strong> (E2E) + <strong>MSW</strong> (API mocking in tests).</li>
+<li><strong>GitHub Actions CI:</strong> lint → typecheck → unit → build → docker image. PR required checks.</li>
+<li>Conventional commits; <code>husky</code> pre-commit (format + typecheck on changed scope).</li>
+</ul>
+<h3>CI acceptance</h3>
+<p>1. Green pipeline on every PR (lint, typecheck, unit, build).</p>
+<p>2. E2E smoke run on merge to <code>main</code>.</p>
+<hr>
+<p># 3. Architecture Decisions (Phase 1 context)</p>
+<p>## 3.1 Backend architecture</p>
+<p><strong>NestJS modular monolith (first) → split later only if forced.</strong> Rationale: MVP scale; modules align to bounded contexts; keeps deployment simple; each module gets a clear seam (queue/HTTP) for future extraction.</p>
+<p>Modules:</p>
+<pre>
+auth &#183; users &#183; needs &#183; intent &#183; catalog (listings) &#183; providers &#183;
+matching &#183; bookings &#183; messaging &#183; reviews &#183; saved &#183; reports &#183;
+notifications &#183; discovery (popular/categories) &#183; files
+</pre>
+<p>Cross-cutting: <strong>PrismaService</strong>, <strong>AppConfig</strong> (env-driven, validated), <strong>Errors</strong> (typed exception map), <strong>Guards</strong> (JWT/roles), <strong>Pipes</strong> (DTO validation via class-validator), <strong>Observability</strong> (Sentry + request logging), <strong>QueueModule</strong> (BullMQ).</p>
+<p>## 3.2 Data architecture</p>
+<ul>
+<li>Single <strong>PostgreSQL</strong> DB with PostGIS. Prisma schema mirrors PRD §5.1.</li>
+<li><strong>Soft-delete</strong> where useful (listings, users); <code>created_at/updated_at</code> everywhere; audit on money/status transitions (simple <code>booking_events</code> log).</li>
+<li><strong>Seed data:</strong> 5 categories, sub-tags, 30–50 realistic providers/listings (Lagos IKEJA/VI/LEKKI + Abuja), example need-intent fixtures for tests.</li>
+</ul>
+<p>## 3.3 Concurrency & consistency</p>
+<ul>
+<li>Status transitions via guarded updates (e.g., booking <code>requested→confirmed</code> accepts only current status — use <code>WHERE status = :expected</code> update).</li>
+<li><strong>Optimistic</strong> for reviews; <strong>idempotency keys</strong> on booking creation.</li>
+<li>Queue (BullMQ/Redis) for: notification fan-out, request→provider match broadcast, review→rating recompute.</li>
+</ul>
+<p>## 3.4 API conventions</p>
+<ul>
+<li><code>/api/v1</code>, JSON, JWT bearer (access 15m / refresh 7d cookie or header).</li>
+<li>Pagination: <code>limit/offset</code> (default 20, cap 100). Rate-limit public + auth routes.</li>
+<li>All money as <strong>integer minor units (kobo)</strong>, currency column <code>NGN</code>.</li>
+<li>Error shape: <code>{ error: { code, message, details? } }</code>; typed codes for client handling.</li>
+<li>OpenAPI generated from NestJS decorators (<code>@nestjs/swagger</code>) — drives typed client + doc.</li>
+</ul>
+<p>## 3.5 Security baseline</p>
+<ul>
+<li>Argon2id password hashing; OTP single-use w/ TTL + rate limit (5 attempts).</li>
+<li>JWT stored httpOnly (refresh) — no secrets in client bundle.</li>
+<li>File upload: type/extension/mime allowlist + size caps (images ≤ 5MB), served via Cloudinary URLs.</li>
+<li>No secrets in repo (<code>.env.example</code> only); CI secrets in GitHub encrypted secrets.</li>
+<li>CORS allowlist; helmet; strict CSP on web.</li>
+</ul>
+<hr>
+<p># 4. Intent Engine (Phase 2) — design</p>
+<p>## 4.1 Pipeline</p>
+<pre>
+raw text → normalize (Naira variants, abbreviations) → LLM extraction (strict JSON schema)
+        → validate/fallback (rule engine) → Intent (PRD &#167;6.1)
+</pre>
+<ul>
+<li>LLM: <code>gpt-4o-mini</code> <strong>R</strong> with function/tool-forced JSON output, prompt tuned for Nigerian phrasing (<code>₦150k</code>, <code>under 150k</code>, city/LGA names, "for my child" audiences).</li>
+<li><strong>Fallback rule engine</strong> (pure TS in <code>packages/engine</code>, offline, unit-tested): keyword→category map, budget regex <code>(₦?)(\d[\d,.]*)\s?k?</code>, result-type heuristics per PRD §6.2, timing keyword parser (<code>tomorrow</code>, <code>next week</code>, <code>monday</code>).</li>
+<li><strong>Latency budget:</strong> intent returned ≤ 2s p95; caching of stable parses by normalized text hash (hot cache TTL 24h).</li>
+<li>Each parse stored (request_id, model_label, confidence) for eval + tuning.</li>
+</ul>
+<p>## 4.2 Eval harness</p>
+<ul>
+<li>Fixture suite from buildable PRD §6.1 acceptance cases + 50 real-style Nigerian need sentences.</li>
+<li>CI job: run suite nightly, report precision/recall against expected Intents; block merges on regression below threshold.</li>
+</ul>
+<hr>
+<p># 5. Matching & Ranking Service (Phase 2)</p>
+<ul>
+<li>Pure TS in <code>packages/engine</code>, unit-tested; invoked by API.</li>
+<li><strong>Hard filters</strong> (PRD §6.3): category/tag intersect · budget · service area · availability · status=active.</li>
+<li><strong>Score</strong> = weighted sum (relevance .30 · distance_fit .20 · price_fit .15 · rating .15 · trust .10 · freshness .10); weights in config table for tuning.</li>
+<li>Geo: distance via PostGIS (or haversine util) between seeker coords and provider <code>area</code> center; <code>distance_fit</code> falls off with km.</li>
+<li><strong>Refinement</strong> applies as filter/re-rank deltas on existing candidate set (no re-parse).</li>
+<li>Caching: per-request candidate result cache (Redis, invalidated on listing/provider change).</li>
+</ul>
+<h3>Matching acceptance (from PRD §6.3)</h3>
+<p>1. No result violates budget/area/availability.</p>
+<p>2. Verified > unverified at equal score.</p>
+<p>3. Refinements re-rank w/o re-parsing, conversation state preserved.</p>
+<hr>
+<p># 6. Feature Phases & Deliverables</p>
+<p>## Phase 1 — Core backend (auth, users, catalog)</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Monorepo foundation; NestJS API; Prisma schema for all MVP entities; migrations.</li>
+<li>Auth: signup/login (phone+OTP <strong>Termii</strong>; email+password fallback), refresh, profile, device token stub.</li>
+<li>Catalog: listing CRUD (product/service), portfolio upload, categories/tags seed, provider profile editor API.</li>
+<li>Files: Cloudinary upload endpoint.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>E2E: signup → verify OTP → create listing → list by category.</li>
+<li>100% of schema under migrations; CI green.</li>
+</ul>
+<p>## Phase 2 — Need understanding + results</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Intent module + <code>packages/engine</code> (parser client, fallback, scorer).</li>
+<li><code>POST /needs</code> (submit→parse→match→results), <code>GET /needs/:id/results</code>, <code>PATCH /needs/:id</code> refinement, <code>GET /needs/mine</code>.</li>
+<li>Result card backing data (person/product/service/multiple) serialized.</li>
+<li>Popular needs endpoint; discovery placeholder.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>All parse acceptance cases pass in CI suite.</li>
+<li>Submit→results page ≤2s parse + ≤3s aggregate p95 against seeded data.</li>
+<li>PRD §6.3 matching acceptance met.</li>
+</ul>
+<p>## Phase 3 — Seeker app (web PWA)</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Design-system pages: Home (#1.4), Results, Listing/Provider detail, My Needs, Saved.</li>
+<li>Contact actions, Save, example chips, refinement interactions (cheaper/closer/budget/gender/portfolio).</li>
+<li>Responsive mobile-first, installable PWA (manifest, offline shell, basic cache).</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>Flow A (PRD §4.1) and Flow B end-to-end vs seeded data.</li>
+<li>Lighthouse mobile ≥ 90 (perf/a11y/PWA).</li>
+</ul>
+<p>## Phase 4 — Messaging + bookings</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Conversations (request-scoped), messages REST + polling (5s) MVP.</li>
+<li>Booking lifecycle API (requested→confirmed→in_progress→completed→cancelled) + provider confirm UI + status stepper.</li>
+<li>Contact action creates conversation + notification.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>Flow B complete: book → confirm → complete.</li>
+<li>Seekers cannot message provider before a contact action; conversations scoped to request (PRD §20).</li>
+</ul>
+<p>## Phase 5 — Provider workspace</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Profile wizard (offer → listings → prices → area → availability → portfolio).</li>
+<li>Incoming requests (matched demand + direct), respond w/ quote + availability.</li>
+<li>Bookings/orders management; rating/review view; provider reliability fields visible.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>Flow C (PRD §4.3) complete; onboarding gate: profile complete before discoverable (PRD §8).</li>
+</ul>
+<p>## Phase 6 — Trust, notifications, My Needs completeness</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Reviews (post-completed booking, aspects per PRD §21), rating recompute.</li>
+<li>Reports API + admin list view.</li>
+<li>Verified badge display (enum/display only; verification flow = later).</li>
+<li>In-app notifications (trigger list PRD §11); My Needs tabs (requests/saved/bookings/purchases/conversations).</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>Post-completion review visible on profile; report reaches admin queue.</li>
+<li>All PRD §11 triggers produce in-app notifications.</li>
+</ul>
+<p>## Phase 7 — Polish, test coverage, release readiness</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Playwright E2E for PRD §14 acceptance criteria (1–10).</li>
+<li>A11y pass; performance budget; empty/error/offline states.</li>
+<li>Seed data refresh for market realism; docs (README, env setup).</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>PRD §14 checklist all green.</li>
+<li>Demo data deploys to staging; upgrade path planned.</li>
+</ul>
+<p>## Phase 8 — Launch (MVP release)</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>Staging → production pipeline (GitHub Actions → build image → Railway/Render; Neon prod DB).</li>
+<li>Monitoring: Sentry + health + uptime; basic dashboards (submissions, contact rate, completion).</li>
+<li>Rollback runbook; support channel; incident logging.</li>
+<li>Launch: initial five categories live, invite ~20 real providers (Lagos) to seed supply.</li>
+</ul>
+<p><strong>Exit criteria (product)</strong> — PRD §1.3 target metrics visible on dashboard at 2 weeks.</p>
+<hr>
+<p># 7. Post-MVP Roadmap (for planning only)</p>
+<ul>
+<li><strong>Phase 1+ (trust/payments):</strong> provider verification flow + docs, Paystack payments (deposit/full/after-completion; escrow for high-risk), push (FCM) + email.</li>
+<li><strong>Phase 2+ (scale/engagement):</strong> multi-need orchestration ("Your Moving Needs", PRD §29), provider subscriptions, promoted listings, lead fees, business accounts.</li>
+<li><strong>Phase 3+ (scope):</strong> global-ready (i18n, multi-currency), Typesense search if needed, admin console v2, mobile web → native if warranted.</li>
+</ul>
+<hr>
+<p># 8. Cross-cutting workstreams</p>
+<table>
+<tr><td>Workstream</td><td>Where</td><td>Min effort to start</td></tr>
+<tr><td>Design system</td><td>Phase 0</td><td>tokens + Home reference page</td></tr>
+<tr><td>Testing</td><td>all</td><td>unit on engine; E2E on flows A–D</td></tr>
+<tr><td>DevOps/CI</td><td>Phase 0</td><td>lint/typecheck/build; deploys at Phase 8</td></tr>
+<tr><td>Observability</td><td>Phase 1</td><td>Sentry + request logging; dashboards Phase 8</td></tr>
+<tr><td>Accessibility</td><td>Phase 3/7</td><td>DS-native focus/keyboard; audit at Phase 7</td></tr>
+<tr><td>Security</td><td>Phase 1/7</td><td>OTP limits, JWT, upload rules; review at Phase 7</td></tr>
+<tr><td>Performance</td><td>Phase 3/7</td><td>budgets, code-split, PWA cache</td></tr>
+</table>
+<hr>
+<p># 9. Sequencing order (critical path)</p>
+<pre>
+Design system (0) → Backend core (1) → Intent+Matching (2) → Seeker app (3)
+→ Messaging/Bookings (4) → Provider workspace (5) → Trust/Notify (6)
+→ Polish/Release readiness (7) → Launch (8)
+</pre>
+<p>Parallel tracks: <strong>DS/web UI</strong> (can build screens against mocked API early) and <strong>API+engine</strong> (can integrate once Phase 2 lands). Flows A–D (PRD §4) are the continuous integration spine.</p>
+<hr>
+<p># 10. Risks & mitigations</p>
+<table>
+<tr><td>Risk</td><td>Mitigation</td></tr>
+<tr><td>LLM intent parse quality</td><td>fallback rules + eval harness + confidence threshold → ask-for-clarification UX</td></tr>
+<tr><td>Cold-start supply (few providers)</td><td>seed data + invite real providers at launch; demand flow (PRD §18) makes empty states productive</td></tr>
+<tr><td>Geo accuracy in Nigeria (no postcodes)</td><td>city + LGA model; manual area picker; GPS optional</td></tr>
+<tr><td>OTP/delivery cost + reliability</td><td>Termii w/ Twilio fallback; OTP on request only; allow email fallback</td></tr>
+<tr><td>Matching bikeshedding</td><td>weights in config; A/B + metrics before tuning; never break hard filters</td></tr>
+<tr><td>Mobile-data cost (NG market)</td><td>lightweight PWA, image CDN sizing, offline shell</td></tr>
+<tr><td>Vendor lock-in</td><td>env-driven providers; intent + matching in pure TS engine</td></tr>
+</table>
+<hr>
+<p># 11. Recommended first sprint (Week 1)</p>
+<p>1. Establish monorepo + packages (<code>ui</code>, <code>shared</code>, <code>db</code>, <code>engine</code>, <code>api</code>, <code>web</code>).</p>
+<p>2. Design tokens + Tailwind preset + Home reference page.</p>
+<p>3. Prisma schema v1 + migrations + seed script.</p>
+<p>4. Auth (OTP via Termii test key) + listing CRUD API.</p>
+<p>5. Engines: begin intent fixture suite; write fallback rule parser.</p>
+<p>6. CI: lint/typecheck/unit/build green.</p>
+<p>Exit: developer can run <code>docker compose up</code> (Postgres+Redis), register via OTP, create a listing, and see it in a seeded category — with CI passing on <code>main</code>.</p>
+<hr>
+<p># 12. Appendix — tech-owner notes</p>
+<ul>
+<li><strong>Money:</strong> store kobo; format ₦ via <code>Intl</code>; budget comparisons on integers only.</li>
+<li><strong>Prisma + PostGIS:</strong> geo columns via raw SQL migrations; keep <code>engine</code> float math pure/tested.</li>
+<li><strong>Real-time decision:</strong> polling (5s) is cheapest and sufficient for MVP messaging; revisit only if engagement shows need.</li>
+<li><strong>Multi-need:</strong> <code>extras[]</code> captured in Intent schema now; orchestration UI later.</li>
+<li><strong>i18n:</strong> store UI strings as en-NG; keep plural/currency rules in one util from day one.</li>
+</ul>
+</body></html>

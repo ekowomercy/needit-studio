@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Allow postinstall scripts for these trusted toolchain packages.
+dangerouslyAllowAllBuilds: true
