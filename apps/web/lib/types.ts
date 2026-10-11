@@ -173,6 +173,19 @@ export interface ProviderListing {
   createdAt: string;
 }
 
+export interface Review {
+  id: string;
+  rating: number;
+  quality: number | null;
+  communication: number | null;
+  reliability: number | null;
+  value: number | null;
+  comment: string | null;
+  createdAt: string;
+  authorName: string | null;
+  authorAvatar: string | null;
+}
+
 export interface Notification {
   id: string;
   userId: string;
