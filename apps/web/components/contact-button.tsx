@@ -30,6 +30,7 @@ export function ContactButton({
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function start() {
@@ -46,10 +47,11 @@ export function ContactButton({
     setBusy(true);
     setError(null);
     try {
-      await api(`/needs/${needId}/contact`, {
+      const res = await api<{ conversationId: string }>(`/needs/${needId}/contact`, {
         method: 'POST',
         body: { providerId, message: message.trim() || undefined },
       });
+      setConversationId(res.conversationId);
       setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send');
@@ -73,12 +75,18 @@ export function ContactButton({
                   Enquiry sent
                 </h3>
                 <p className="text-body-sm">
-                  {providerName} has been notified and can reply in your conversations. Messaging
-                  threads unlock in the next update.
+                  {providerName} has been notified. Continue the conversation in messages.
                 </p>
-                <Button block onClick={() => setOpen(false)}>
-                  Done
-                </Button>
+                <div className="modal-actions">
+                  <Button variant="ghost" onClick={() => setOpen(false)}>
+                    Done
+                  </Button>
+                  {conversationId ? (
+                    <Link href={`/conversations/${conversationId}`} className="btn btn-primary">
+                      Open conversation
+                    </Link>
+                  ) : null}
+                </div>
               </>
             ) : needId ? (
               <>

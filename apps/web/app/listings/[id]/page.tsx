@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, Badge, EmptyState, Price, Rating, Skeleton } from '@needit/ui';
 import { ContactButton } from '@/components/contact-button';
+import { BookingButton } from '@/components/booking-button';
 import { SaveButton } from '@/components/save-button';
 import { ReviewList } from '@/components/review-list';
 import { api, ApiError } from '@/lib/api';
@@ -141,11 +142,20 @@ export default function ListingDetailPage() {
           ) : null}
 
           <div className="detail-actions">
+            <BookingButton
+              providerId={listing.providerId}
+              providerName={providerName}
+              listingId={listing.id}
+              needId={needId}
+              defaultType={isProduct ? 'order' : 'booking'}
+              label={isProduct ? 'Order' : 'Book'}
+            />
             <ContactButton
               providerId={listing.providerId}
               providerName={providerName}
               needId={needId}
               label={isProduct ? 'Contact seller' : 'Contact / Book'}
+              variant="secondary"
             />
             <SaveButton
               size="md"

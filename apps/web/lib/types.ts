@@ -185,3 +185,65 @@ export interface Review {
   authorName: string | null;
   authorAvatar: string | null;
 }
+
+export interface ConversationParticipant {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  verificationStatus: VerificationStatus;
+  isProvider: boolean;
+}
+
+export interface ConversationSummary {
+  id: string;
+  userId: string;
+  providerId: string;
+  needRequestId: string | null;
+  updatedAt: string;
+  other: ConversationParticipant | null;
+  needText: string | null;
+  unreadCount: number;
+  lastMessage: {
+    body: string | null;
+    sentAt: string;
+    senderId: string;
+  } | null;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  body: string | null;
+  mediaUrls: string[] | null;
+  sentAt: string;
+  readAt: string | null;
+}
+
+export type BookingType = 'booking' | 'order' | 'request_fill';
+export type BookingStatus =
+  | 'requested'
+  | 'confirmed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'refunded';
+
+export interface Booking {
+  id: string;
+  userId: string;
+  providerId: string;
+  listingId: string | null;
+  needRequestId: string | null;
+  type: BookingType;
+  status: BookingStatus;
+  scheduledAt: string | null;
+  quoteKobo: number | null;
+  currency: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  providerName: string | null;
+  seekerName: string | null;
+  listingTitle: string | null;
+}

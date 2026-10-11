@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Badge, Button, EmptyState, Price, Skeleton } from '@needit/ui';
 import { useAuth } from '@/components/auth-provider';
+import { BookingList } from '@/components/booking-list';
+import { ConversationList } from '@/components/conversation-list';
 import { api, ApiError } from '@/lib/api';
 import { removeSaved, useSavedItems } from '@/lib/saved';
 import type { NeedRequest } from '@/lib/types';
 
-type Tab = 'requests' | 'saved';
+type Tab = 'requests' | 'bookings' | 'messages' | 'saved';
 
 function formatDate(iso: string): string {
   try {
@@ -72,6 +74,24 @@ export default function MyNeedsPage() {
         <button
           type="button"
           role="tab"
+          aria-selected={tab === 'bookings'}
+          className={`tab${tab === 'bookings' ? ' is-active' : ''}`}
+          onClick={() => setTab('bookings')}
+        >
+          Bookings
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'messages'}
+          className={`tab${tab === 'messages' ? ' is-active' : ''}`}
+          onClick={() => setTab('messages')}
+        >
+          Messages
+        </button>
+        <button
+          type="button"
+          role="tab"
           aria-selected={tab === 'saved'}
           className={`tab${tab === 'saved' ? ' is-active' : ''}`}
           onClick={() => setTab('saved')}
@@ -82,7 +102,11 @@ export default function MyNeedsPage() {
 
       {error ? <p className="error-msg">{error}</p> : null}
 
-      {tab === 'requests' ? (
+      {tab === 'bookings' ? (
+        <BookingList />
+      ) : tab === 'messages' ? (
+        <ConversationList />
+      ) : tab === 'requests' ? (
         requests === null ? (
           <div className="stack">
             {[0, 1].map((i) => (

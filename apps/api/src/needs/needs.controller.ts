@@ -1,22 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import type { Request } from 'express';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ContactNeedDto, CreateNeedDto, RefineNeedDto } from './needs.dto';
 import { NeedsService } from './needs.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../common/current-user.decorator';
 import { Public } from '../common/public.decorator';
-
-interface AuthedRequest extends Request {
-  user: { sub: string };
-}
+import type { AuthUser } from '../auth/auth.guard';
 
 @Controller('needs')
 @UseGuards(AuthGuard)
@@ -24,13 +12,13 @@ export class NeedsController {
   constructor(private readonly needs: NeedsService) {}
 
   @Post()
-  async create(@Body() dto: CreateNeedDto, @Req() req: AuthedRequest) {
-    return this.needs.create(req.user.sub, dto.rawText);
+  async create(@Body() dto: CreateNeedDto, @CurrentUser() user: AuthUser) {
+    return this.needs.create(user.id, dto.rawText);
   }
 
   @Get('mine')
-  async mine(@Req() req: AuthedRequest) {
-    return this.needs.mine(req.user.sub);
+  async mine(@CurrentUser() user: AuthUser) {
+    return this.needs.mine(user.id);
   }
 
   @Public()
@@ -40,30 +28,30 @@ export class NeedsController {
   }
 
   @Get(':id')
-  async get(@Param('id') id: string, @Req() req: AuthedRequest) {
-    return this.needs.get(id, req.user.sub);
+  async get(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.needs.get(id, user.id);
   }
 
   @Get(':id/results')
-  async results(@Param('id') id: string, @Req() req: AuthedRequest) {
-    return this.needs.results(id, req.user.sub);
+  async results(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.needs.results(id, user.id);
   }
 
   @Patch(':id')
   async refine(
     @Param('id') id: string,
     @Body() dto: RefineNeedDto,
-    @Req() req: AuthedRequest,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.needs.refine(id, req.user.sub, dto);
+    return this.needs.refine(id, user.id, dto);
   }
 
   @Post(':id/contact')
   async contact(
     @Param('id') id: string,
     @Body() dto: ContactNeedDto,
-    @Req() req: AuthedRequest,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.needs.contact(req.user.sub, id, dto.providerId, dto.message);
+    return this.needs.contact(user.id, id, dto.providerId, dto.message);
   }
 }
