@@ -1,4 +1,7 @@
-﻿import { NeedsModule } from './needs/needs.module';
+﻿import { ReviewsModule } from './reviews/reviews.module';
+import { ReportsModule } from './reports/reports.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NeedsModule } from './needs/needs.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { Module } from '@nestjs/common';
@@ -24,6 +27,9 @@ import { FilesModule } from './files/files.module';
     NeedsModule,
     ConversationsModule,
     BookingsModule,
+    ReviewsModule,
+    ReportsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
