@@ -202,9 +202,35 @@ export class CatalogService {
   }
 
   async providerProfile(userId: string) {
-    return this.db.query.providerProfiles.findFirst({
-      where: (p, { eq }) => eq(p.userId, userId),
-    });
+    const rows = await this.db
+      .select({
+        id: providerProfiles.id,
+        userId: providerProfiles.userId,
+        headline: providerProfiles.headline,
+        bio: providerProfiles.bio,
+        areaCity: providerProfiles.areaCity,
+        areaRadiusKm: providerProfiles.areaRadiusKm,
+        startingPriceKobo: providerProfiles.startingPriceKobo,
+        availability: providerProfiles.availability,
+        responseRate: providerProfiles.responseRate,
+        responseTimeMin: providerProfiles.responseTimeMin,
+        completedJobs: providerProfiles.completedJobs,
+        verificationStatus: providerProfiles.verificationStatus,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        locationCity: users.locationCity,
+        ratingAvg: users.ratingAvg,
+        reviewCount: users.reviewCount,
+      })
+      .from(providerProfiles)
+      .innerJoin(users, eq(users.id, providerProfiles.userId))
+      .where(eq(providerProfiles.userId, userId))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async providerListings(userId: string) {
+    return this.listListings({ providerId: userId, status: 'active', pageSize: 50 });
   }
 
   async listReviews(providerId: string, page = 1, pageSize = 20) {

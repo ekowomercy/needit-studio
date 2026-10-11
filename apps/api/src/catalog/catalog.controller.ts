@@ -102,4 +102,10 @@ export class CatalogController {
   reviews(@Param('id') id: string, @Query() query: { page?: number; pageSize?: number }) {
     return this.catalog.listReviews(id, Number(query.page ?? 1), Number(query.pageSize ?? 20));
   }
+
+  @Public()
+  @Get('providers/:id/listings')
+  providerListings(@Param('id') id: string) {
+    return this.catalog.providerListings(id);
+  }
 }

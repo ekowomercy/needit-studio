@@ -6,7 +6,15 @@ import {
 } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { Database } from '@needit/db';
-import { categories, listings, needRequests, users } from '@needit/db';
+import {
+  categories,
+  conversations,
+  listings,
+  messages,
+  needRequests,
+  notifications,
+  users,
+} from '@needit/db';
 import type { Intent } from '@needit/shared';
 import {
   matchCandidates,
@@ -88,19 +96,70 @@ export class NeedsService {
   async refine(
     id: string,
     userId: string,
-    dto: { budget?: string; location?: string },
+    dto: { text?: string; budget?: string; location?: string },
   ) {
     const n = await this.get(id, userId);
     const base = (n.intent ?? parseIntentRule(n.rawText)) as Intent;
-    const patch = `${dto.budget ?? ''} ${dto.location ?? ''}`.trim();
+    const patch = `${dto.text ?? ''} ${dto.budget ?? ''}`.trim();
     const reparsed = patch ? parseIntentRule(patch) : null;
     const intent: Intent = {
       ...base,
       budget: reparsed?.budget ?? base.budget,
       location: dto.location ? { text: dto.location } : base.location,
+      condition: reparsed?.condition ?? base.condition,
+      attributes: { ...base.attributes, ...(reparsed?.attributes ?? {}) },
     };
     await this.db.update(needRequests).set({ intent }).where(eq(needRequests.id, id));
     return { need: { ...n, intent }, intent, matches: await this.match(intent) };
+  }
+
+  async contact(
+    userId: string,
+    needId: string,
+    providerId: string,
+    message?: string,
+  ): Promise<{ conversationId: string }> {
+    const need = await this.get(needId, userId);
+    const existing = await this.db.query.conversations.findFirst({
+      where: (c, { and, eq: eqOp }) =>
+        and(
+          eqOp(c.userId, userId),
+          eqOp(c.providerId, providerId),
+          eqOp(c.needRequestId, needId),
+        ),
+    });
+
+    let conversationId = existing?.id;
+    if (!conversationId) {
+      conversationId = `cnv_${randomUUID()}`;
+      await this.db.insert(conversations).values({
+        id: conversationId,
+        userId,
+        providerId,
+        needRequestId: needId,
+      });
+    }
+
+    const body = message?.trim();
+    if (body) {
+      await this.db.insert(messages).values({
+        id: `msg_${randomUUID()}`,
+        conversationId,
+        senderId: userId,
+        body,
+      });
+    }
+
+    await this.db.insert(notifications).values({
+      id: `ntf_${randomUUID()}`,
+      userId: providerId,
+      type: 'need_contact',
+      title: 'New enquiry about your listing',
+      body: body ?? need.rawText,
+      refId: needId,
+    });
+
+    return { conversationId };
   }
 
   private async loadCandidates(): Promise<MatchCandidate[]> {

@@ -10,9 +10,25 @@ export class CreateNeedDto {
 export class RefineNeedDto {
   @IsOptional()
   @IsString()
+  @MaxLength(500)
+  text?: string;
+
+  @IsOptional()
+  @IsString()
   budget?: string;
 
   @IsOptional()
   @IsString()
   location?: string;
+}
+
+export class ContactNeedDto {
+  @IsString()
+  @IsNotEmpty()
+  providerId!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  message?: string;
 }

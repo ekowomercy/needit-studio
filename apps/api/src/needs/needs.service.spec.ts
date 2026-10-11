@@ -111,4 +111,26 @@ describe('NeedsService', () => {
     expect(results.matches.length).toBe(2);
     expect(results.matches[0]!.listing.provider.verificationStatus).toBe('verified');
   });
+
+  it('creates a request-scoped conversation on contact and reuses it', async () => {
+    const { service, db } = await makeService();
+    const catId = await seedCategory(db, 'plumbing');
+    const providerId = await seedProvider(db, { city: 'Lagos', categoryId: catId, slug: 'plumbing' });
+    const created = await service.create('usr_a', 'I need a plumber in Lagos');
+
+    const first = await service.contact('usr_a', created.need!.id, providerId, 'Can you come tomorrow?');
+    const second = await service.contact('usr_a', created.need!.id, providerId);
+    expect(first.conversationId).toBe(second.conversationId);
+
+    const convo = await db.query.conversations.findFirst({
+      where: (c, { eq }) => eq(c.id, first.conversationId),
+    });
+    expect(convo?.providerId).toBe(providerId);
+    expect(convo?.needRequestId).toBe(created.need!.id);
+
+    const notes = await db.query.notifications.findMany({
+      where: (t, { eq }) => eq(t.userId, providerId),
+    });
+    expect(notes.length).toBeGreaterThanOrEqual(1);
+  });
 });

@@ -9,9 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { CreateNeedDto, RefineNeedDto } from './needs.dto';
+import { ContactNeedDto, CreateNeedDto, RefineNeedDto } from './needs.dto';
 import { NeedsService } from './needs.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { Public } from '../common/public.decorator';
 
 interface AuthedRequest extends Request {
   user: { sub: string };
@@ -32,6 +33,7 @@ export class NeedsController {
     return this.needs.mine(req.user.sub);
   }
 
+  @Public()
   @Get('popular')
   async popular() {
     return this.needs.popular();
@@ -54,5 +56,14 @@ export class NeedsController {
     @Req() req: AuthedRequest,
   ) {
     return this.needs.refine(id, req.user.sub, dto);
+  }
+
+  @Post(':id/contact')
+  async contact(
+    @Param('id') id: string,
+    @Body() dto: ContactNeedDto,
+    @Req() req: AuthedRequest,
+  ) {
+    return this.needs.contact(req.user.sub, id, dto.providerId, dto.message);
   }
 }

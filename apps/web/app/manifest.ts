@@ -4,12 +4,33 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'NeedIt Studio',
     short_name: 'NeedIt',
-    description: 'Tell us what you need. We will help you find it.',
+    description: 'Tell us what you need. We will help you find the people, products, and services.',
     start_url: '/',
+    scope: '/',
     display: 'standalone',
+    orientation: 'portrait',
     background_color: '#ffffff',
     theme_color: '#1a7f4b',
+    categories: ['shopping', 'business', 'lifestyle'],
     icons: [
+      {
+        src: '/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
       {
         src: '/icon.svg',
         sizes: 'any',
