@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationBell } from '@/components/notification-bell';
 
 const NAV = [
   { href: '/', label: 'Home' },
@@ -39,6 +40,7 @@ export function SiteHeader() {
         </nav>
         <div className="site-header-actions">
           <ThemeToggle />
+          <NotificationBell />
           {loading ? null : user ? (
             <div className="site-user">
               <span className="site-user-name" title={user.displayName ?? user.phone ?? ''}>
