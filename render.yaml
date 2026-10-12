@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: needit-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: needit-db
+          property: connectionString
+      - key: WEB_ORIGIN
+        value: https://needit-studio.netlify.app
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: LLM_ENABLED
+        value: "false"
+
+databases:
+  - name: needit-db
+    plan: free
+    postgresMajorVersion: "16"

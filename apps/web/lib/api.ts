@@ -88,7 +88,23 @@ async function doFetch(path: string, options: RequestOptions, retry: boolean): P
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const res = await doFetch(path, options, true);
   const text = await res.text();
-  const data = text ? (JSON.parse(text) as unknown) : null;
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!res.ok) {
+        throw new ApiError(res.status, `Request failed (${res.status})`);
+      }
+      throw new ApiError(
+        res.status,
+        contentType.includes('text/html')
+          ? 'The API is not reachable. Check that NEXT_PUBLIC_API_URL is set to the deployed API.'
+          : 'Received an unexpected response from the server.',
+      );
+    }
+  }
   if (!res.ok) {
     const message =
       (data as { message?: string | string[] } | null)?.message ??

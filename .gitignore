@@ -11,3 +11,5 @@ coverage/
 *.tsbuildinfo
 .wrangler/
 vercel.json
+# Local Netlify folder
+.netlify

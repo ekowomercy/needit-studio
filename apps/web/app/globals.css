@@ -612,3 +612,14 @@ body {
   flex-wrap: wrap;
   margin-top: 12px;
 }
+
+.install-banner { position: fixed; bottom: 0; left: 0; right: 0; background: var(--color-surface); border-top: 1px solid var(--color-border); z-index: 1000; box-shadow: 0 -4px 12px -8px rgba(0,0,0,0.2); }
+.install-banner__content { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-4); max-width: 800px; margin: 0 auto; }
+.install-banner__text { font-size: var(--font-size-sm); color: var(--color-text); }
+.install-banner__actions { display: flex; gap: var(--space-2); }
+
+.hero-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+.hero-cta .btn { text-decoration: none; }
+.hero-cta .btn-primary { background: #fff; color: var(--p-700); border-color: #fff; }
+.hero-cta .btn-ghost { color: #fff; border-color: rgba(255, 255, 255, 0.7); background: transparent; }
+.hero-cta .btn-ghost:hover { background: rgba(255, 255, 255, 0.14); }

@@ -29,8 +29,13 @@ export default function LoginPage() {
   const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
-    const n = new URLSearchParams(window.location.search).get('next');
+    const params = new URLSearchParams(window.location.search);
+    const n = params.get('next');
     if (n && n.startsWith('/')) setNext(n);
+    if (params.get('signup') === '1') {
+      setMode('email');
+      setIsSignup(true);
+    }
   }, []);
 
   useEffect(() => {

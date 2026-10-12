@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Chip } from '@needit/ui';
+import { useAuth } from '@/components/auth-provider';
 import { NeedForm } from '@/components/need-form';
 import { api } from '@/lib/api';
 import type { Category, PopularNeed } from '@/lib/types';
@@ -20,6 +22,7 @@ function phraseFor(tag: string, sample?: string): string {
 }
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
   const [popular, setPopular] = useState<PopularNeed[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [seed, setSeed] = useState('');
@@ -40,6 +43,16 @@ export default function HomePage() {
         <p className="text-body-lg" style={{ margin: 0, opacity: 0.92 }}>
           Tell us naturally — we&apos;ll find the people, products &amp; services near you.
         </p>
+        {!loading && !user ? (
+          <div className="hero-cta">
+            <Link href="/login?signup=1" className="btn btn-primary">
+              Sign up — it&apos;s free
+            </Link>
+            <Link href="/login" className="btn btn-ghost">
+              Sign in
+            </Link>
+          </div>
+        ) : null}
         <NeedForm key={seed} initialText={seed} />
       </section>
 

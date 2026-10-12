@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/components/auth-provider';
 import { PwaRegister } from '@/components/pwa-register';
+import { InstallPrompt } from '@/components/install-prompt';
 import { SiteHeader } from '@/components/site-header';
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <PwaRegister />
           <SiteHeader />
+          <InstallPrompt />
           <div className="site-main">{children}</div>
           <footer className="site-footer">
             <span>NeedIt Studio</span>

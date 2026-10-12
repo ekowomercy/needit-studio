@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'NeedIt Studio',
-    short_name: 'NeedIt',
+    short_name: 'NeedIt Studio',
     description: 'Tell us what you need. We will help you find the people, products, and services.',
     start_url: '/',
     scope: '/',
