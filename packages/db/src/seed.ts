@@ -1,4 +1,5 @@
 import { hashSync } from 'bcryptjs';
+import { eq } from 'drizzle-orm';
 import { getDatabase } from './index';
 import * as schema from './schema';
 import { id } from './ids';
@@ -46,19 +47,30 @@ async function main() {
   const db = getDatabase();
   console.log('seeding categories…');
 
-  const categoryIds = new Map<string, string>();
+  const existingCategories = await db.select().from(schema.categories);
+  const categoryIds = new Map<string, string>(
+    existingCategories.map((c) => [c.slug, c.id]),
+  );
+
   for (const parent of seedCategories) {
-    const parentId = id('cat');
-    await db.insert(schema.categories).values({
-      id: parentId,
-      slug: parent.slug,
-      name: parent.name,
-      icon: parent.icon,
-      sortOrder: 0,
-    });
-    categoryIds.set(parent.slug, parentId);
+    let parentId = categoryIds.get(parent.slug);
+    if (!parentId) {
+      parentId = id('cat');
+      await db.insert(schema.categories).values({
+        id: parentId,
+        slug: parent.slug,
+        name: parent.name,
+        icon: parent.icon,
+        sortOrder: 0,
+      });
+      categoryIds.set(parent.slug, parentId);
+    }
     let order = 0;
     for (const child of parent.children ?? []) {
+      if (categoryIds.has(child.slug)) {
+        order++;
+        continue;
+      }
       const childId = id('cat');
       await db.insert(schema.categories).values({
         id: childId,
@@ -178,6 +190,15 @@ const providers: SeedProvider[] = [
   ];
 
   for (const p of providers) {
+    const existing = await db
+      .select({ id: schema.users.id })
+      .from(schema.users)
+      .where(eq(schema.users.phone, p.phone))
+      .limit(1);
+    if (existing.length > 0) {
+      console.log(`skip existing provider ${p.name}`);
+      continue;
+    }
     const userId = id('usr');
     await db.insert(schema.users).values({
       id: userId,
