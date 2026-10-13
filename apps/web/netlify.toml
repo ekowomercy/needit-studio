@@ -10,13 +10,7 @@
   NODE_VERSION = "24"
 
 [context.production.environment]
-  NEXT_PUBLIC_API_URL = ""
+  NEXT_PUBLIC_API_URL = "https://needit-api.onrender.com/api/v1"
 
 [context.deploy-preview.environment]
-  NEXT_PUBLIC_API_URL = ""
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+  NEXT_PUBLIC_API_URL = "https://needit-api.onrender.com/api/v1"
