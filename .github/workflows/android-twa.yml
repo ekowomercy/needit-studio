@@ -48,6 +48,22 @@ jobs:
           yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" --licenses >/dev/null 2>&1 || true
           "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" "platform-tools" "platforms;android-36" "build-tools;36.1.0"
 
+      - name: Wait for PWA assets to be live
+        run: |
+          for url in \
+            "https://needit-studio.netlify.app/icon-512.png" \
+            "https://needit-studio.netlify.app/notification-icon.png"; do
+            echo "Waiting for $url"
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+            for i in $(seq 1 30); do
+              [ "$code" = "200" ] && break
+              sleep 10
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+            done
+            echo "$url -> $code"
+            if [ "$code" != "200" ]; then echo "Asset not available: $url"; exit 1; fi
+          done
+
       - name: Generate Android project from twa-manifest.json
         run: bubblewrap update --skipVersionUpgrade --manifest=./twa-manifest.json
 
