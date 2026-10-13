@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.needitstudio.app",
+      "sha256_cert_fingerprints": [
+        "10:81:23:CA:E6:11:E3:58:A9:0E:95:DA:59:33:58:9D:48:34:2C:EA:DD:27:61:8D:12:D3:19:C5:C6:2D:F0:84"
+      ]
+    }
+  }
+]

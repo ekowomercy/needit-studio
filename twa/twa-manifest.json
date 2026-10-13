@@ -12,10 +12,11 @@
   "navigationDividerColor": "#000000",
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#ffffff",
-  "enableNotifications": false,
+  "enableNotifications": true,
   "startUrl": "/",
   "iconUrl": "https://needit-studio.netlify.app/icon-512.png",
   "maskableIconUrl": "https://needit-studio.netlify.app/icon-512.png",
+  "monochromeIconUrl": "https://needit-studio.netlify.app/notification-icon.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",

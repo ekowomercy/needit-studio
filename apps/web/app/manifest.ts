@@ -32,6 +32,12 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
       {
+        src: '/notification-icon.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'monochrome',
+      },
+      {
         src: '/icon.svg',
         sizes: 'any',
         type: 'image/svg+xml',
