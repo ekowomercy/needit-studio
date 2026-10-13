@@ -15,4 +15,4 @@ FROM base AS runtime
 ENV NODE_ENV=production
 COPY --from=build /app ./
 EXPOSE 3001
-CMD ["sh", "-c", "pnpm --filter @needit/db migrate:prod && pnpm --filter @needit/db seed && node apps/api/dist/main.js"]
+CMD ["sh", "-c", "pnpm --filter @needit/db migrate:prod && pnpm --filter @needit/db seed && pnpm --filter @needit/api exec tsx src/main.ts"]
