@@ -13,3 +13,5 @@ coverage/
 vercel.json
 # Local Netlify folder
 .netlify
+# Downloaded Android build outputs
+android-artifacts/
