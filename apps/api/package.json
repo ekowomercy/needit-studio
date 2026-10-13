@@ -23,11 +23,13 @@
     "class-transformer": "^0.5",
     "class-validator": "^0.14",
     "drizzle-orm": "^0.44",
+    "pg": "^8",
     "reflect-metadata": "^0.2",
     "rxjs": "^7"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "@swc/core": "^1",
     "@types/bcryptjs": "^2",
     "@types/express": "^5",
     "@types/multer": "^2",

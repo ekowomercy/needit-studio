@@ -8,5 +8,6 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   banner: { js: 'require("reflect-metadata");' },
+  noExternal: [/^@needit\//],
   esbuildPlugins: [],
 });

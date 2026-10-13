@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
  * SMS OTP delivery. In development the console impl is used so flows work
  * with no credentials; when TERMII_API_KEY is present it sends via Termii.
  */
+export const OTP_PROVIDER = 'OTP_PROVIDER';
+
 export interface OtpProvider {
   send(phone: string, code: string, purpose: string): Promise<boolean>;
 }

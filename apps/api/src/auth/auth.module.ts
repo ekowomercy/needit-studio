@@ -3,12 +3,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { OtpTokenService } from './otp-token.service';
-import { SmsOtpProvider } from './otp.provider';
+import { OTP_PROVIDER, SmsOtpProvider } from './otp.provider';
 
 @Module({
   imports: [JwtModule.register({ global: true })],
   controllers: [AuthController],
-  providers: [AuthService, OtpTokenService, SmsOtpProvider],
+  providers: [AuthService, OtpTokenService, { provide: OTP_PROVIDER, useClass: SmsOtpProvider }],
   exports: [JwtModule, AuthService],
 })
 export class AuthModule {}

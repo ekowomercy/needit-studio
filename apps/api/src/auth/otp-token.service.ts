@@ -5,12 +5,13 @@ import type { Database } from '@needit/db';
 import { otpCodes } from '@needit/db';
 import { DATABASE } from '../database/database.module';
 import type { OtpProvider } from './otp.provider';
+import { OTP_PROVIDER } from './otp.provider';
 
 @Injectable()
 export class OtpTokenService {
   constructor(
     @Inject(DATABASE) private readonly db: Database,
-    private readonly otpProvider: OtpProvider,
+    @Inject(OTP_PROVIDER) private readonly otpProvider: OtpProvider,
   ) {}
 
   private hash(code: string): string {
