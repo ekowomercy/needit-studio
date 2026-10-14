@@ -1,5 +1,6 @@
 import { doublePrecision, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import {
+  type UserRole,
   type VerificationStatus,
 } from '@needit/shared';
 
@@ -17,6 +18,10 @@ export const users = pgTable('users', {
     .notNull()
     .default(0)
     .$type<0 | 1>(),
+  role: text('role')
+    .$type<UserRole>()
+    .default('buyer')
+    .notNull(),
   ratingAvg: doublePrecision('rating_avg').default(0).notNull(),
   reviewCount: integer('review_count').default(0).notNull(),
   verificationStatus: text('verification_status')

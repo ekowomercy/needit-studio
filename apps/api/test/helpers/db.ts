@@ -19,6 +19,7 @@ export async function createTestDb(): Promise<Database> {
     "latitude" double precision,
     "longitude" double precision,
     "is_provider" integer DEFAULT 0 NOT NULL,
+    "role" text DEFAULT 'buyer' NOT NULL,
     "rating_avg" double precision DEFAULT 0 NOT NULL,
     "review_count" integer DEFAULT 0 NOT NULL,
     "verification_status" text DEFAULT 'unverified' NOT NULL,

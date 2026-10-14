@@ -4,6 +4,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { NeedsModule } from './needs/needs.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { AdminModule } from './admin/admin.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -30,6 +31,7 @@ import { FilesModule } from './files/files.module';
     ReviewsModule,
     ReportsModule,
     NotificationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

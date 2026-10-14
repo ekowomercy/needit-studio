@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Badge } from '@needit/ui';
 import { useAuth } from '@/components/auth-provider';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { NotificationBell } from '@/components/notification-bell';
 
 const NAV = [
   { href: '/', label: 'Home' },
+  { href: '/sell', label: 'Sell' },
   { href: '/conversations', label: 'Messages' },
   { href: '/bookings', label: 'Bookings' },
   { href: '/me', label: 'My Needs' },
@@ -43,6 +45,9 @@ export function SiteHeader() {
           <NotificationBell />
           {loading ? null : user ? (
             <div className="site-user">
+              <Badge variant="neutral" title={`Signed in as ${user.role}`}>
+                {user.role}
+              </Badge>
               <span className="site-user-name" title={user.displayName ?? user.phone ?? ''}>
                 {user.displayName ?? user.phone ?? 'Account'}
               </span>

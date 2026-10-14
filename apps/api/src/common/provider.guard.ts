@@ -12,7 +12,7 @@ export class ProviderGuard implements CanActivate {
     const row = await this.db.query.users.findFirst({
       where: (u, { eq }) => eq(u.id, request.user!.id),
     });
-    if (!row || row.isProvider !== 1) throw new ForbiddenException('Provider account required');
+    if (!row || row.role !== 'seller') throw new ForbiddenException('Seller account required');
     return true;
   }
 }

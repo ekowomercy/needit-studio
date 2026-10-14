@@ -17,7 +17,7 @@ export class UsersService {
     const profile = await this.db.query.providerProfiles.findFirst({
       where: (p) => eq(p.userId, userId),
     });
-    return { ...user, isProvider: user.isProvider === 1, providerProfile: profile ?? null };
+    return { ...user, isProvider: user.role === 'seller', providerProfile: profile ?? null };
   }
 
   async updateMe(userId: string, input: {
@@ -40,6 +40,7 @@ export class UsersService {
         latitude: input.latitude,
         longitude: input.longitude,
         isProvider: input.isProvider ? 1 : undefined,
+        role: input.isProvider ? 'seller' : undefined,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));

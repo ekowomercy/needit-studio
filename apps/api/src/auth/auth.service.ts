@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Inject } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { eq, or } from 'drizzle-orm';
+import type { UserRole } from '@needit/shared';
 import type { Database } from '@needit/db';
 import { users } from '@needit/db';
 import { randomUUID } from 'node:crypto';
@@ -22,6 +23,7 @@ export interface TokenPair {
     phone: string | null;
     email: string | null;
     displayName: string | null;
+    role: UserRole;
     isProvider: boolean;
   };
 }
@@ -124,7 +126,7 @@ export class AuthService {
     }
   }
 
-  private async tokenPair(row: { id: string; phone: string | null; email: string | null; displayName: string | null; isProvider: number }): Promise<TokenPair> {
+  private async tokenPair(row: { id: string; phone: string | null; email: string | null; displayName: string | null; role: UserRole }): Promise<TokenPair> {
     const accessSecret = process.env.JWT_ACCESS_SECRET ?? 'dev-access-secret';
     const refreshSecret = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret';
     return {
@@ -141,7 +143,8 @@ export class AuthService {
         phone: row.phone,
         email: row.email,
         displayName: row.displayName,
-        isProvider: row.isProvider === 1,
+        role: row.role,
+        isProvider: row.role === 'seller',
       },
     };
   }

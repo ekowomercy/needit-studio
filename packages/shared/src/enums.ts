@@ -1,3 +1,6 @@
+export const UserRole = ['admin', 'seller', 'buyer'] as const;
+export type UserRole = (typeof UserRole)[number];
+
 export const ResultType = ['person', 'product', 'service', 'multiple'] as const;
 export type ResultType = (typeof ResultType)[number];
 

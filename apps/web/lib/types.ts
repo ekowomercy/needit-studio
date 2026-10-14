@@ -1,4 +1,4 @@
-import type { Intent } from '@needit/shared';
+import type { Intent, UserRole } from '@needit/shared';
 
 export type ListingType = 'product' | 'service';
 export type PriceType = 'fixed' | 'starting' | 'quote';
@@ -90,6 +90,7 @@ export interface SessionUser {
   phone: string | null;
   email: string | null;
   displayName: string | null;
+  role: UserRole;
   isProvider: boolean;
 }
 
@@ -105,6 +106,7 @@ export interface AuthUser {
   email: string | null;
   displayName: string | null;
   avatarUrl: string | null;
+  role: UserRole;
   isProvider: boolean;
   locationCity: string | null;
   latitude: number | null;
