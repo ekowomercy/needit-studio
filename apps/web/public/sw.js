@@ -1,5 +1,5 @@
 /* NeedIt Studio service worker — app-shell cache + offline fallback. */
-const CACHE = 'needit-static-v1';
+const CACHE = 'needit-static-v2';
 const PRECACHE = ['/', '/offline', '/manifest.webmanifest', '/icon.svg'];
 
 self.addEventListener('install', (event) => {
