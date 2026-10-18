@@ -40,6 +40,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    google: 'as_ndGCy2wT5JdzMYBjsmyfCHLsbrB4J-oe1mYphVzw',
+  },
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
