@@ -5,10 +5,41 @@ import { AuthProvider } from '@/components/auth-provider';
 import { PwaRegister } from '@/components/pwa-register';
 import { InstallPrompt } from '@/components/install-prompt';
 import { SiteHeader } from '@/components/site-header';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'NeedIt Studio — What do you need?',
-  description: 'Tell us what you need. We will help you find the people, products, and services.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'NeedIt Studio — What do you need?',
+    template: '%s — NeedIt Studio',
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'NeedIt Studio',
+    'buy and sell Nigeria',
+    'find services near me',
+    'local providers',
+    'products and services',
+    'Lagos marketplace',
+  ],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: 'NeedIt Studio — What do you need?',
+    description: SITE_DESCRIPTION,
+    locale: 'en_NG',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'NeedIt Studio — What do you need?',
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [

@@ -11,6 +11,8 @@
 
 [context.production.environment]
   NEXT_PUBLIC_API_URL = "https://needit-api.onrender.com/api/v1"
+  NEXT_PUBLIC_SITE_URL = "https://needit-studio.netlify.app"
 
 [context.deploy-preview.environment]
   NEXT_PUBLIC_API_URL = "https://needit-api.onrender.com/api/v1"
+  NEXT_PUBLIC_SITE_URL = "https://needit-studio.netlify.app"
